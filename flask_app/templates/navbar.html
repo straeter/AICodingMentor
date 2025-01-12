@@ -1,0 +1,63 @@
+{% set navigation_bar_left = [
+
+] -%}
+
+{% set navigation_bar_logged_out = [
+(url_for('main.home'), 'Home'),
+] -%}
+
+{% set navigation_bar_logged_in = [
+] -%}
+
+<nav class="navbar sticky-top navbar-expand-lg navbar-light bg-light mr-auto " id="main-nav">
+  <div class="container">
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+            aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse justify-content-center flex-grow-1 " id="navbarNav">
+
+{#      <ul class="navbar-nav ">#}
+{#        <a class="navbar-brand" href="{{ url_for('main.home') }}" style="margin-right: 50px">#}
+{#          <img#}
+{#            src="{{ url_for('static', filename='logo/banner_inv.svg') }}" height="35px" width="140px"#}
+{#          ><img#}
+{#          class="logo" src="{{ url_for('static',filename='logo/logo.svg') }}" height="35px" width="35px"/>#}
+{#        </a>#}
+{#      </ul>#}
+
+      <ul class="navbar-nav navbar-custom ml-auto">
+
+{#        {% if current_user.is_authenticated %}#}
+
+{#          {% for href, id in navigation_bar_left %}#}
+{#            <li class="nav-item mynavbar {% if id == active_page %}active{% endif %}">#}
+{#              <a class="nav-link" href="{{ href }}">{{ id }}</a>#}
+{#            </li>#}
+{#          {% endfor %}#}
+{##}
+{#          <li class="nav-item dropdown">#}
+{#            <button class="nav-link dropdown-toggle" id="navbarDropdown" role="button" data-bs-toggle="dropdown"#}
+{#                    aria-haspopup="true" aria-expanded="false">#}
+{#              <img src="{{ url_for('static', filename='default.png') }}" width="35" height="35" class="rounded-circle">#}
+{#            </button>#}
+{#            <div class="dropdown-menu" aria-labelledby="navbarDropdown">#}
+{#              {% for href, id in navigation_bar_logged_in %}#}
+{#                <a class="dropdown-item nav-link" href="{{ href }}">{{ id }}</a>#}
+{#              {% endfor %}#}
+{#            </div>#}
+{#          </li>#}
+{##}
+{#        {% else %}#}
+          {% for href, id in navigation_bar_logged_out %}
+            <li class="nav-item mynavbar {% if id == active_page %}active{% endif %}">
+              <a class="nav-link" href="{{ href }}">{{ id }}</a>
+            </li>
+          {% endfor %}
+{#        {% endif %}#}
+      </ul>
+    </div>
+  </div>
+</nav>
+
+

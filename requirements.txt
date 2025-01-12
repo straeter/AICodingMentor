@@ -1,0 +1,8 @@
+tqdm
+requests
+aiohttp
+python-dotenv
+openai
+flask
+flask-bootstrap
+markdown

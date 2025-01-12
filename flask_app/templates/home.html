@@ -1,0 +1,252 @@
+{% extends "meta.html" %}
+{% set active_page = "Scan" %}
+
+{% block content %}
+  <div class="row my-3" style="text-align: center">
+    <h1>AI Code Trainer</h1>
+  </div>
+  <div class="row flex-grow-1">
+    <div class="col-md-4">
+      <div class="custom-block">
+        <form
+          method="POST"
+          id="getChallenge"
+        >
+          <div class="row">
+            <div class="col-12 col-md-6 mb-3">
+              <h4>Programming L.</h4>
+
+              <select
+                class="form-select"
+                aria-label="Default select example"
+                id="pLanguage"
+                name="pLanguage"
+                onchange="updatePLanguage();"
+              >
+                <option value="python">Python</option>
+                <option value="javascript">JavaScript</option>
+                <option value="java">Java</option>
+                <option value="c">C</option>
+                <option value="cpp">C++</option>
+                <option value="csharp">C#</option>
+                <option value="go">Go</option>
+                <option value="php">PHP</option>
+                <option value="ruby">Ruby</option>
+                <option value="typescript">TypeScript</option>
+                <option value="swift">Swift</option>
+                <option value="kotlin">Kotlin</option>
+              </select>
+            </div>
+
+            <div class="col-12 col-md-6 mb-3">
+              <h4>Language</h4>
+
+              <select
+                class="form-select"
+                aria-label="Default select example"
+                id="language"
+                name="language"
+              >
+                <option value="english">English</option>
+                <option value="german">German</option>
+                <option value="french">French</option>
+                <option value="spanish">Spanish</option>
+                <option value="italian">Italian</option>
+                <option value="portuguese">Portuguese</option>
+                <option value="russian">Russian</option>
+                <option value="chinese">Chinese</option>
+                <option value="japanese">Japanese</option>
+                <option value="korean">Korean</option>
+                <option value="arabic">Arabic</option>
+                <option value="turkish">Turkish</option>
+              </select>
+            </div>
+
+            <div class="col-12 col-md-6 mb-3">
+              <h4>Difficulty</h4>
+              {#            <label for="difficulty" class="form-label">Difficulty</label>#}
+              <div style="display: flex; justify-content: space-between;">
+                <div>Easy</div>
+                <div>Medium</div>
+                <div>Hard</div>
+              </div>
+              <input
+                type="range"
+                class="form-range"
+                min="1"
+                max="5"
+                id="difficulty"
+                name="difficulty"
+              >
+            </div>
+            <div class="col-12 col-md-6 mb-3">
+              <h4>Length</h4>
+              {#            <label for="difficulty" class="form-label">Difficulty</label>#}
+              <div style="display: flex; justify-content: space-between;">
+                <div>Short</div>
+                <div>Medium</div>
+                <div>Long</div>
+              </div>
+              <input
+                type="range"
+                class="form-range"
+                min="1"
+                max="5"
+                id="length"
+                name="length"
+              >
+            </div>
+
+            <div class="col-12 mb-3">
+              <h4
+                data-toggle="tooltip"
+                data-placement="top"
+                title="Enter either the absolute path of the repository / folder or the path relative to the running application"
+              >Topic / Description</h4>
+              <div class="d-flex">
+                <input
+                  type="text"
+                  class="form-control me-2"
+                  id="description"
+                  name="description"
+                  placeholder="Optional: Specify topic..."
+                >
+              </div>
+            </div>
+            <div class="col-12 mb-3">
+              <button
+                type="submit"
+                id="getChallange"
+                class="btn btn-success"
+              >
+                Generate New Challenge
+              </button>
+            </div>
+
+
+          </div>
+        </form>
+      </div>
+
+      <div class="custom-block mt-3">
+        <div class="col-12 mb-3">
+
+          <div style="display: flex; justify-content: space-between;">
+
+            <button type="button" class="btn btn-outline-success" id="getHint" onclick="toggleHint()">
+              Get Hint
+            </button>
+
+            <button type="button" class="btn btn-outline-info" id="showSolution" onclick="showSolution()">
+              Show Possible Solution
+            </button>
+            <button type="button" class="btn btn-info" id="hideSolution" style="display: none" onclick="hideSolution()">
+              Hide Solution
+            </button>
+
+            <button type="button" class="btn btn-success" id="submitAnswer">
+              Submit
+            </button>
+          </div>
+        </div>
+
+        <div class="col-12 mb-3">
+          <h4>Feedback</h4>
+          <div id="feedback" style="display: none; min-height: 200px"></div>
+        </div>
+
+        <div class="col-12 mb-3">
+          <h4>Hint</h4>
+          <div id="hint" style="display: none; min-height: 200px"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col col-md-8">
+      <div class="custom-block" style="height:100%!important; display: flex; flex-direction: column;">
+        <h4>Assignment</h4>
+        <div id="assignment" style="min-height: 30px"></div>
+
+        <h4>Code</h4>
+        <div style="flex-grow: 1">
+          <div id="editor"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <script>
+
+    var editor = null;
+    var attempt = "";
+
+    function showSolution() {
+      attempt = editor.getValue();
+      editor.session.setValue(currentContent.solution, -1);
+      document.getElementById('showSolution').style.display = 'none';
+      document.getElementById('hideSolution').style.display = 'block';
+    }
+    function hideSolution() {
+      editor.session.setValue(attempt, -1);
+      document.getElementById('showSolution').style.display = 'block';
+      document.getElementById('hideSolution').style.display = 'none';
+    }
+
+    function toggleHint() {
+      var hint = document.getElementById('hint');
+      hint.style.display = hint.style.display === 'none' ? 'block' : 'none';
+    }
+
+    function updateLanguage() {
+      var mode = 'ace/mode/' + $('option:selected').attr('value');
+      editor.getSession().setMode(mode);
+    }
+
+    function appendToEditorContent(extraCode) {
+      const lastRow = editor.session.getLength() - 1;
+      const lastColumn = editor.session.getLine(lastRow).length;
+      editor.session.insert({row: lastRow, column: lastColumn}, extraCode);
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+      editor = ace.edit("editor");
+      editor.getSession().setUseWorker(false);
+      editor.setTheme("ace/theme/monokai");
+      editor.getSession().setMode("ace/mode/python");
+      editor.setOptions({
+        fontSize: "14pt"
+      });
+    });
+
+    document.getElementById('getChallenge').addEventListener('submit', function (event) {
+      event.preventDefault(); // Prevent the default form submission
+
+      var data = {
+        p_language: document.getElementById('pLanguage').value,
+        language: document.getElementById('language').value,
+        difficulty: document.getElementById('difficulty').value,
+        length: document.getElementById('length').value,
+        description: document.getElementById('description').value,
+      };
+      fetchStream(data);
+    });
+
+    document.getElementById('submitAnswer').addEventListener('submit', function (event) {
+      event.preventDefault(); // Prevent the default form submission
+      attempt = editor.getValue();
+      var data = {
+        p_language: document.getElementById('pLanguage').value,
+        language: document.getElementById('language').value,
+        difficulty: document.getElementById('difficulty').value,
+        length: document.getElementById('length').value,
+        description: document.getElementById('description').value,
+        attempt: editor.getValue(),
+      };
+      fetchFeedback(data);
+    });
+
+  </script>
+
+
+{% endblock content %}

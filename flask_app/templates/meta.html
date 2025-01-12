@@ -1,0 +1,60 @@
+{% block doc -%}
+  <!DOCTYPE html>
+  <html lang="en">
+  {%- block html %}
+    <head>
+      {%- block head %}
+        {% include "head.html" %}
+      {%- endblock head %}
+
+      {% block scripts %}
+      {%- endblock scripts %}
+
+    </head>
+
+    <body>
+
+    <div class="spinner-overlay">
+      <div class="spinner-total"></div>
+    </div>
+    {##}
+    {#    {% block navbar %}#}
+    {#      {% include "navbar.html" %}#}
+    {#    {% endblock navbar %}#}
+
+    {% block body -%}
+      <!-- FLash Messages at top of the page -->
+      <div class="container-fluid">
+        <div id="flash-container" class="sticky-flash">
+          {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+              {% for category, message in messages %}
+                <div class="alert alert-{{ category }} alert-fade">
+                  {{ message | safe }}
+                </div>
+              {% endfor %}
+            {% endif %}
+          {% endwith %}
+        </div>
+      </div>
+      <div class="container-fluid bg-light min-vh-100 d-flex flex-column">
+        <div class="col px-3 pt-2 d-flex flex-column flex-grow-1">
+          {% block content -%}
+          {%- endblock content %}
+        </div>
+      </div>
+    {%- endblock body %}
+
+    </body>
+
+    <script>
+      window.setTimeout(function () {
+        $(".alert-fade").fadeTo(500, 0).slideUp(500, function () {
+          $(this).remove();
+        });
+      }, 4000);
+    </script>
+
+  {%- endblock html %}
+  </html>
+{% endblock doc -%}
