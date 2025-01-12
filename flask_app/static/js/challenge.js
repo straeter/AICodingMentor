@@ -60,7 +60,7 @@ async function fetchStream(data) {
       var splitted = content.split("§§§§§")
       const lSplit = splitted.length
       currentContent.assignment = splitted[0]
-      if (content.includes("!!!!!")) {
+      if (totalResponse.includes("!!!!!")) {
         currentContent.code = splitted[1]
       }
       currentContent.solution = splitted[lSplit - 2]
