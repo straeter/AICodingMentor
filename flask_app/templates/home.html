@@ -170,7 +170,7 @@
         <h4>Assignment</h4>
         <div id="assignment" style="min-height: 30px"></div>
 
-        <h4>Code</h4>
+        <h4 id="codeTitle">Your Code</h4>
         <div style="flex-grow: 1">
           <div id="editor"></div>
         </div>
@@ -189,12 +189,14 @@
       editor.session.setValue(currentContent.solution, -1);
       document.getElementById('showSolution').style.display = 'none';
       document.getElementById('hideSolution').style.display = 'block';
+      document.getElementById('codeTitle').innerHTML = 'Possible Solution';
       editor.setReadOnly(true);
     }
     function hideSolution() {
       editor.session.setValue(attempt, -1);
       document.getElementById('showSolution').style.display = 'block';
       document.getElementById('hideSolution').style.display = 'none';
+      document.getElementById('codeTitle').innerHTML = 'Your Code';
       editor.setReadOnly(false);
     }
 

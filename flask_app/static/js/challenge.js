@@ -67,8 +67,6 @@ async function fetchStream(data) {
       currentContent.hint = splitted[lSplit - 1]
     }
 
-
-
     let done = false;
     var chunk = ""
 
