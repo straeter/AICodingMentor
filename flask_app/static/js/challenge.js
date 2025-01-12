@@ -14,19 +14,6 @@ function clearContent() {
   }
 }
 
-function splitContent(content) {
-  var splitContent = content
-  splitContent = content.replace("!!!!!", "§§§§§").replace("?????", "§§§§§")
-  var splitted = splitContent.split("§§§§§")
-  const lSplit = splitted.length
-  currentContent.assignment = splitted[0]
-  if (content.includes("!!!!!")) {
-    currentContent.code = splitted[1]
-  }
-  currentContent.solution = splitted[lSplit - 2]
-  currentContent.hint = splitContent[lSplit - 1]
-}
-
 
 async function fetchStream(data) {
   try {
@@ -63,6 +50,25 @@ async function fetchStream(data) {
       hintDiv.textContent = currentContent.hint;
     }
 
+    function splitContent() {
+      var content = totalResponse
+      content = content.replace("!!!!!", "§§§§§").replace("?????", "§§§§§")
+      var pLanguage = document.getElementById('pLanguage').value
+      if (content.includes("```" + pLanguage)) {
+        content = content.replace("```" + pLanguage, "").replace("```", "")
+      }
+      var splitted = content.split("§§§§§")
+      const lSplit = splitted.length
+      currentContent.assignment = splitted[0]
+      if (content.includes("!!!!!")) {
+        currentContent.code = splitted[1]
+      }
+      currentContent.solution = splitted[lSplit - 2]
+      currentContent.hint = splitted[lSplit - 1]
+    }
+
+
+
     let done = false;
     var chunk = ""
 
@@ -79,15 +85,15 @@ async function fetchStream(data) {
         }
 
         if (totalResponse.includes("!!!!!") && currentBlock === "assignment") {
-          splitContent(totalResponse);
+          splitContent();
           assignContent();
           currentBlock = "code";
         } else if (totalResponse.includes("?????") && currentBlock === "code") {
-          splitContent(totalResponse);
+          splitContent();
           assignContent();
           currentBlock = "solution";
         } else if (totalResponse.includes("§§§§§") && currentBlock === "solution") {
-          splitContent(totalResponse);
+          splitContent();
           assignContent();
           currentBlock = "hint";
         } else {

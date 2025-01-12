@@ -23,7 +23,7 @@ The user has set the difficulty level of the challenge to {difficulty} on a scal
 The user has set the length of the challenge to {length} on a scale from 1 (short and quick) to 5 (long and involved) - but this applies to the length of the solution, the assignment itself is usually short.
 Be creative and do not use always the standard coding challenges.
 
-Do not use any syntax / environment hints like ```python ... ```.
+Do not use any syntax / environment hints like ```{p_language} ... ```.
 It is ok to expect knowledge of common non-standard libraries like numpy, torch etc. if the context and difficulty is appropriate and especially if the user requests it.
 
 Please create the programming challenge in the following order:
