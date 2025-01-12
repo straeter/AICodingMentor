@@ -29,12 +29,15 @@
                 <option value="c">C</option>
                 <option value="cpp">C++</option>
                 <option value="csharp">C#</option>
-                <option value="go">Go</option>
+                <option value="golang">Golang</option>
                 <option value="php">PHP</option>
                 <option value="ruby">Ruby</option>
+                <option value="rust">Rust</option>
                 <option value="typescript">TypeScript</option>
                 <option value="swift">Swift</option>
                 <option value="kotlin">Kotlin</option>
+                <option value="html">HTML</option>
+                <option value="pgsql">Postgres</option>
               </select>
             </div>
 
@@ -134,13 +137,13 @@
           <div style="display: flex; justify-content: space-between;">
 
             <button type="button" class="btn btn-outline-success" id="getHint" onclick="toggleHint()">
-              Get Hint
+              Show Hint
             </button>
 
-            <button type="button" class="btn btn-outline-info" id="showSolution" onclick="showSolution()">
+            <button type="button" class="btn btn-outline-secondary" id="showSolution" onclick="showSolution()">
               Show Possible Solution
             </button>
-            <button type="button" class="btn btn-info" id="hideSolution" style="display: none" onclick="hideSolution()">
+            <button type="button" class="btn btn-secondary" id="hideSolution" style="display: none" onclick="hideSolution()">
               Hide Solution
             </button>
 
@@ -152,7 +155,7 @@
 
         <div class="col-12 mb-3">
           <h4>Feedback</h4>
-          <div id="feedback" style="display: none; min-height: 200px"></div>
+          <div id="feedback" style="min-height: 20px"></div>
         </div>
 
         <div class="col-12 mb-3">
@@ -186,20 +189,26 @@
       editor.session.setValue(currentContent.solution, -1);
       document.getElementById('showSolution').style.display = 'none';
       document.getElementById('hideSolution').style.display = 'block';
+      editor.setReadOnly(true);
     }
     function hideSolution() {
       editor.session.setValue(attempt, -1);
       document.getElementById('showSolution').style.display = 'block';
       document.getElementById('hideSolution').style.display = 'none';
+      editor.setReadOnly(false);
     }
 
     function toggleHint() {
       var hint = document.getElementById('hint');
       hint.style.display = hint.style.display === 'none' ? 'block' : 'none';
+      var hintButton = document.getElementById('getHint');
+      hintButton.innerHTML = hint.style.display === 'none' ? 'Show Hint' : 'Hide Hint';
     }
 
-    function updateLanguage() {
-      var mode = 'ace/mode/' + $('option:selected').attr('value');
+    function updatePLanguage() {
+      var selection = $('option:selected').attr('value');
+      selection = ['c', 'cpp'].includes(selection) ? 'c_cpp' : selection;
+      var mode = 'ace/mode/' + selection;
       editor.getSession().setMode(mode);
     }
 
@@ -232,15 +241,20 @@
       fetchStream(data);
     });
 
-    document.getElementById('submitAnswer').addEventListener('submit', function (event) {
+    document.getElementById('submitAnswer').addEventListener('click', function (event) {
       event.preventDefault(); // Prevent the default form submission
       attempt = editor.getValue();
+      console.log(attempt);
       var data = {
         p_language: document.getElementById('pLanguage').value,
         language: document.getElementById('language').value,
         difficulty: document.getElementById('difficulty').value,
         length: document.getElementById('length').value,
         description: document.getElementById('description').value,
+        assignment: currentContent.assignment,
+        code: currentContent.code,
+        solution: currentContent.solution,
+        hint: currentContent.hint,
         attempt: editor.getValue(),
       };
       fetchFeedback(data);

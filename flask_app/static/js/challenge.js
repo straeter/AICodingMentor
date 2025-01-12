@@ -15,22 +15,16 @@ function clearContent() {
 }
 
 function splitContent(content) {
-  var splitContent = content.split("!!!!!")
-  currentContent.assignment = splitContent[0]
-  if (splitContent.length === 1) {
-    return
+  var splitContent = content
+  splitContent = content.replace("!!!!!", "§§§§§").replace("?????", "§§§§§")
+  var splitted = splitContent.split("§§§§§")
+  const lSplit = splitted.length
+  currentContent.assignment = splitted[0]
+  if (content.includes("!!!!!")) {
+    currentContent.code = splitted[1]
   }
-  splitContent = splitContent[1].split("?????")
-  currentContent.code = splitContent[0]
-  if (splitContent.length === 1) {
-    return
-  }
-  splitContent = splitContent[1].split("§§§§§")
-  currentContent.solution = splitContent[0]
-  if (splitContent.length === 1) {
-    return
-  }
-  currentContent.hint = splitContent[1]
+  currentContent.solution = splitted[lSplit - 2]
+  currentContent.hint = splitContent[lSplit - 1]
 }
 
 
@@ -143,7 +137,7 @@ async function fetchFeedback(data) {
     while (!done) {
       const {value, done: streamDone} = await stream.read();
       done = streamDone;
-
+      console.log(value)
       if (value) {
         chunk = value
         totalResponse += chunk;
