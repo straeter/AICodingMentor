@@ -13,7 +13,7 @@ def home():
 
     return render_template(
         'home.html',
-        page_title="AI Security Engineer - Home",
+        page_title="AI Coding Trainer - Home",
 
     )
 
