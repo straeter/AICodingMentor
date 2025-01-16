@@ -11,7 +11,7 @@ main = Blueprint('main', __name__)
 def home():
     return render_template(
         'home.html',
-        page_title="AI Coding Trainer - Home",
+        page_title="AICodingMentorg - Home",
     )
 
 
