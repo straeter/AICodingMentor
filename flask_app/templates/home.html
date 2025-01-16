@@ -260,7 +260,6 @@
     document.getElementById('submitAnswer').addEventListener('click', function (event) {
       event.preventDefault(); // Prevent the default form submission
       attempt = editor.getValue();
-      console.log(attempt);
       var data = {
         p_language: document.getElementById('pLanguage').value,
         language: document.getElementById('language').value,

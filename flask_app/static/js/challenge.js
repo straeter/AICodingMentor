@@ -106,7 +106,6 @@ async function fetchStream(data) {
         }
       }
     }
-    console.log('Stream complete');
   } catch (error) {
     console.error('Fetch error:', error);
   }
@@ -142,7 +141,6 @@ async function fetchFeedback(data) {
     while (!done) {
       const {value, done: streamDone} = await stream.read();
       done = streamDone;
-      console.log(value)
       if (value) {
         chunk = value
         totalResponse += chunk;
@@ -156,7 +154,6 @@ async function fetchFeedback(data) {
 
       }
     }
-    console.log('Stream complete');
   } catch (error) {
     console.error('Fetch error:', error);
   }
