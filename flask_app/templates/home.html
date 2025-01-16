@@ -117,13 +117,25 @@
               </div>
             </div>
             <div class="col-12 mb-3">
-              <button
-                type="submit"
-                id="getChallange"
-                class="btn btn-success"
-              >
-                Generate New Challenge
-              </button>
+              <div style="justify-content: space-between">
+{#                <label>#}
+{#                  <input#}
+{#                    type="checkbox" {{ "checked" if save_questions else "" }}#}
+{#                    class="custom-checkbox"#}
+{#                    id="save_questions"#}
+{#                    name="save_questions"#}
+{#                  >#}
+{#                  <span class="checkmark"></span>#}
+{#                  Save History#}
+{#                </label>#}
+                <button
+                  type="submit"
+                  id="getChallange"
+                  class="btn btn-success"
+                >
+                  Generate New Challenge
+                </button>
+              </div>
             </div>
 
 
@@ -143,7 +155,8 @@
             <button type="button" class="btn btn-outline-secondary" id="showSolution" onclick="showSolution()">
               Show Possible Solution
             </button>
-            <button type="button" class="btn btn-secondary" id="hideSolution" style="display: none" onclick="hideSolution()">
+            <button type="button" class="btn btn-secondary" id="hideSolution" style="display: none"
+                    onclick="hideSolution()">
               Hide Solution
             </button>
 
@@ -192,6 +205,7 @@
       document.getElementById('codeTitle').innerHTML = 'Possible Solution';
       editor.setReadOnly(true);
     }
+
     function hideSolution() {
       editor.session.setValue(attempt, -1);
       document.getElementById('showSolution').style.display = 'block';

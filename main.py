@@ -1,7 +1,6 @@
 import argparse
 
 from flask_app.app import create_app
-import os
 
 
 def main(debug=False):

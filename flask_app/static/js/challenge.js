@@ -52,7 +52,10 @@ async function fetchStream(data) {
 
     function splitContent() {
       var content = totalResponse
-      content = content.replace("!!!!!", "§§§§§").replace("?????", "§§§§§")
+      content = content
+        .replace("§CODE§", "§§§§§")
+        .replace("§SOLUTION§", "§§§§§")
+        .replace("§HINT§", "§§§§§")
       var pLanguage = document.getElementById('pLanguage').value
       if (content.includes("```" + pLanguage)) {
         content = content.replace("```" + pLanguage, "").replace("```", "")
@@ -60,11 +63,9 @@ async function fetchStream(data) {
       var splitted = content.split("§§§§§")
       const lSplit = splitted.length
       currentContent.assignment = splitted[0]
-      if (totalResponse.includes("!!!!!")) {
-        currentContent.code = splitted[1]
-      }
-      currentContent.solution = splitted[lSplit - 2]
-      currentContent.hint = splitted[lSplit - 1]
+      currentContent.code = splitted[1]
+      currentContent.solution = splitted[2]
+      currentContent.hint = splitted[3]
     }
 
     let done = false;
@@ -82,15 +83,15 @@ async function fetchStream(data) {
           break;
         }
 
-        if (totalResponse.includes("!!!!!") && currentBlock === "assignment") {
+        if (totalResponse.includes("§CODE§") && currentBlock === "assignment") {
           splitContent();
           assignContent();
           currentBlock = "code";
-        } else if (totalResponse.includes("?????") && currentBlock === "code") {
+        } else if (totalResponse.includes("§SOLUTION§") && currentBlock === "code") {
           splitContent();
           assignContent();
           currentBlock = "solution";
-        } else if (totalResponse.includes("§§§§§") && currentBlock === "solution") {
+        } else if (totalResponse.includes("§HINT§") && currentBlock === "solution") {
           splitContent();
           assignContent();
           currentBlock = "hint";

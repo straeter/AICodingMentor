@@ -30,9 +30,9 @@ Start now with the assessment and feedback in language {language}:
 """
     return prompt
 
-def get_feedback_stream(**kwargs):
+def get_feedback_stream(model="gpt-4o-mini", **kwargs):
     prompt = get_feedback_prompt(**kwargs)
-    response_stream = llm.chat(prompt, stream=True, temperature=0.1)
+    response_stream = llm.chat(prompt, stream=True, temperature=0.1, model=model)
     for event in response_stream:
         chunk = event.choices[0].delta.content
         if chunk:

@@ -9,7 +9,7 @@ from flask_app.utils import jinja_templates
 functions = inspect.getmembers(jinja_templates, inspect.isfunction)
 
 
-def create_app():
+def create_app(model="gpt-4o-mini"):
     app = Flask(__name__, template_folder="templates")
 
     app.config.from_object(Config)
