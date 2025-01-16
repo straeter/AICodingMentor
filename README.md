@@ -17,6 +17,11 @@ pip install -r requirements.txt
 OPENAI_API_KEY=<your_openai_api_key>
 ```
 
+3. Optionally you can choose another (OpenAI) LLM model, the default model is `gpt-4o-mini`
+```bash
+LLM_MODEL=<name_of_llm>
+```
+
 ## Usage
 
 1. Run the following command to start the flask app
