@@ -1,4 +1,4 @@
-# AI Coding Trainer
+# AICodingMentor 
 Generate fun coding challenges and improve your skills.
 
 This app uses LLMs to generate coding challenges for common programming languages. The user can also choose the language, the level of difficulty and challenge length, and specify the topic. They can show a hint, a possible solution and get feedback on their attempts.
