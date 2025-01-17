@@ -107,14 +107,17 @@
                 title="Enter either the absolute path of the repository / folder or the path relative to the running application"
               >Topic / Description</h4>
               <div class="d-flex">
-                <input
-                  type="text"
+                <textarea
                   class="form-control me-2"
                   id="description"
                   name="description"
                   placeholder="Optional: Specify topic..."
-                >
+                  oninput="updateCharCount()"
+                  maxlength="200"
+                  rows="2"
+                ></textarea><br>
               </div>
+              <small id="charCount">0/200</small>
             </div>
             <div class="col-12 mb-3">
               <div style="justify-content: space-between">
@@ -196,6 +199,12 @@
 
     var editor = null;
     var attempt = "";
+
+    function updateCharCount() {
+      const input = document.getElementById('description');
+      const charCount = document.getElementById('charCount');
+      charCount.textContent = `${input.value.length}/200`;
+    }
 
     function showSolution() {
       attempt = editor.getValue();
