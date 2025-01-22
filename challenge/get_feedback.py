@@ -36,6 +36,5 @@ def get_feedback_stream(model="gpt-4o-mini", **kwargs):
     for event in response_stream:
         chunk = event.choices[0].delta.content
         if chunk:
-            print(chunk)
             yield chunk
     yield "&&&"
