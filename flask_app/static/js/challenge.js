@@ -2,7 +2,8 @@ var currentContent = {
   assignment: "",
   code: "",
   solution: "",
-  hint: ""
+  hint: "",
+  feedback: ""
 }
 
 function clearContent() {
@@ -10,7 +11,8 @@ function clearContent() {
     assignment: "",
     code: "",
     solution: "",
-    hint: ""
+    hint: "",
+    feedback: ""
   }
 }
 
@@ -37,17 +39,17 @@ async function fetchStream(data) {
     var totalResponse = "";
 
     const assignmentDiv = document.getElementById('assignment');
-    assignmentDiv.textContent = "";
+    assignmentDiv.innerHTML = "";
     const hintDiv = document.getElementById('hint');
-    hintDiv.textContent = "";
+    hintDiv.innerHTML = "";
 
     clearContent();
 
     function assignContent() {
       splitContent(totalResponse);
-      assignmentDiv.textContent = currentContent.assignment;
+      assignmentDiv.innerHTML = marked.parse(currentContent.assignment);
       editor.session.setValue(currentContent.code, -1);
-      hintDiv.textContent = currentContent.hint;
+      hintDiv.innerHTML = marked.parse(currentContent.hint);
     }
 
     function splitContent() {
@@ -97,11 +99,11 @@ async function fetchStream(data) {
           currentBlock = "hint";
         } else {
           if (currentBlock === "assignment") {
-            assignmentDiv.textContent += chunk;
+            assignmentDiv.innerHTML += chunk;
           } else if (currentBlock === "code") {
             appendToEditorContent(chunk)
           } else if (currentBlock === "hint") {
-            hintDiv.textContent += chunk;
+            hintDiv.innerHTML += chunk;
           }
         }
       }
@@ -133,7 +135,7 @@ async function fetchFeedback(data) {
     var totalResponse = "";
 
     const feedbackDiv = document.getElementById('feedback');
-    feedbackDiv.textContent = "";
+    feedbackDiv.innerHTML = "";
 
     let done = false;
     var chunk = ""
@@ -145,12 +147,11 @@ async function fetchFeedback(data) {
         chunk = value
         totalResponse += chunk;
 
+        feedbackDiv.innerHTML = marked.parse(totalResponse.replace('&&&', ''));
         if (totalResponse.includes('&&&')) {
-          feedbackDiv.textContent = totalResponse.replace('&&&', '');
+          currentContent.feedback = totalResponse.replace('&&&', '');
           break;
         }
-
-        feedbackDiv.textContent += chunk;
 
       }
     }
