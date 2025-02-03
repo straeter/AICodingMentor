@@ -42,10 +42,10 @@ pre {
 }
 
 code {
-    height: 100% !important;
+  height: 100% !important;
   font-family: 'Courier New', Courier, monospace; /* Monospaced font */
   font-size: 14px !important; /* Adjust font size */
-  padding: 0 0 5px 0!important; /* Remove default padding */
+  padding: 0 0 5px 0 !important; /* Remove default padding */
   /*width: 850px !important;*/
   max-width: 850px !important; /* Fixed width */
   width: 100% !important; /* Responsive */
@@ -111,7 +111,7 @@ code {
 }
 
 #editor {
-    position: relative;
-  height:100%;
-    width: 100%;
+  position: relative;
+  height: 100%;
+  width: 100%;
 }

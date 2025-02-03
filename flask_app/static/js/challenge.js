@@ -21,11 +21,6 @@ function clearContent() {
   currentContent = emptyContent
 }
 
-function clearQueryParam(name) {
-  const url = new URL(window.location.href);
-  url.searchParams.delete(name);
-}
-
 function ensureCorrectQuery(name, variable) {
   const url = new URL(window.location.href);
   const params = url.searchParams;
@@ -63,7 +58,7 @@ async function fetchStream(data) {
     const hintDiv = document.getElementById('hint');
     hintDiv.innerHTML = "";
 
-    clearQueryParam("challengeId");
+    ensureCorrectQuery("challengeId", "");
 
     clearContent();
 
@@ -82,6 +77,7 @@ async function fetchStream(data) {
         .replace("§SOLUTION§", "§§§§§")
         .replace("§HINT§", "§§§§§")
         .replace("§ID§", "§§§§§")
+        .replace("§END§", "§§§§§")
       var pLanguage = document.getElementById('pLanguage').value
       if (content.includes("```" + pLanguage)) {
         content = content.replace("```" + pLanguage, "").replace("```", "")
@@ -94,7 +90,7 @@ async function fetchStream(data) {
       currentContent.solution = lSplit > 3 ? splitted[3] : "";
       currentContent.hint = lSplit > 4 ? splitted[4] : "";
       if (lSplit > 5) {
-        currentContent.challengeId = splitted[6];
+        currentContent.challengeId = splitted[5];
         ensureCorrectQuery('challengeId', currentContent.challengeId);
       }
     }
@@ -141,6 +137,9 @@ async function fetchStream(data) {
         }
       }
     }
+    console.log(totalResponse)
+    splitContent();
+    assignContent();
   } catch (error) {
     console.error('Fetch error:', error);
   }
