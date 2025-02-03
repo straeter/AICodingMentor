@@ -2,7 +2,7 @@ from flask import Blueprint, render_template, request, current_app, jsonify, str
 
 from challenge.get_challenge import get_challenge_stream
 from challenge.get_feedback import get_feedback_stream
-from flask_app.simple_db import db_get_challenge, db_delete_challenge
+from flask_app.simple_db import db_get_challenge, db_delete_challenge, db_get_all_challenges
 
 main = Blueprint('main', __name__)
 
@@ -12,7 +12,7 @@ main = Blueprint('main', __name__)
 def home():
     challengeId = request.args.get("challengeId")
     if challengeId:
-        challenge = db_get_challenge(challengeId)
+        challenge = db_get_challenge(challengeId).to_dict()
     else:
         challenge = None
 
@@ -41,13 +41,14 @@ def get_feedback():
     return feedback_stream
 
 
-# @main.route('/history', methods=['GET'])
-# def home():
-#     return render_template(
-#         'history.html',
-#         page_title="AICodingMentorg - History",
-#         challenges=challenges
-#     )
+@main.route('/history', methods=['GET'])
+def history():
+    challenges = db_get_all_challenges()
+    return render_template(
+        'history.html',
+        page_title="AICodingMentorg - History",
+        challenges=challenges
+    )
 
 @main.route('/challenge/delete/<challengeId>', methods=['POST'])
 def delete_challenge(challengeId):

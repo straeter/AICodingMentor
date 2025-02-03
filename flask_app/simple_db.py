@@ -3,6 +3,8 @@ import secrets
 import string
 from datetime import datetime
 
+from sqlalchemy.inspection import inspect
+
 from flask_app.app import db
 
 
@@ -29,6 +31,12 @@ class Challenge(db.Model):
     def update(self, data):
         for attr, value in data.items():
             setattr(self, attr, value)
+
+    def to_dict(self):
+        result = {
+            c.key: str(getattr(self, c.key)) if isinstance(getattr(self, c.key), datetime) else getattr(self, c.key)
+            for c in inspect(self).mapper.column_attrs}
+        return result
 
     def __repr__(self):
         return f"Challenge('{self.title}', '{self.updated_at}')"
@@ -84,3 +92,8 @@ def db_update_challenge(challengeId, **kwargs):
         db.session.commit()
         return True
     return False
+
+
+def db_get_all_challenges():
+    challenges = Challenge.query.order_by(Challenge.updated_at.desc()).all()
+    return challenges

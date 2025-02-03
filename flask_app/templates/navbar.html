@@ -1,0 +1,41 @@
+{% set navbar_items = [
+(url_for('main.home'), 'Challenge'),
+(url_for('main.history'), 'History'),
+] -%}
+
+
+<nav class="navbar sticky-top navbar-expand-lg navbar-light bg-light mr-auto " id="main-nav">
+  <div class="container">
+
+    <a class="navbar-brand" href="{{ url_for('main.home') }}">
+      <div>AICodingMentor</div>
+    </a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+            aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse justify-content-center flex-grow-1 " id="navbarNav">
+
+      {#      <ul class="navbar-nav ">#}
+      {#        <a class="navbar-brand" href="{{ url_for('main.home') }}" style="margin-right: 50px">#}
+      {#          <img#}
+      {#            src="{{ url_for('static', filename='logo/banner_inv.svg') }}" height="35px" width="140px"#}
+      {#          ><img#}
+      {#          class="logo" src="{{ url_for('static',filename='logo/logo.svg') }}" height="35px" width="35px"/>#}
+      {#        </a>#}
+      {#      </ul>#}
+
+
+      <ul class="navbar-nav navbar-custom ml-auto">
+        {% for href, id in navbar_items %}
+          <li class="nav-item mynavbar {% if id == active_page %}active{% endif %}">
+            <a class="nav-link" href="{{ href }}">{{ id }}</a>
+          </li>
+        {% endfor %}
+      </ul>
+    </div>
+
+  </div>
+</nav>
+
+
