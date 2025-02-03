@@ -1,7 +1,9 @@
+from flask_app.simple_db import db_update_challenge
 from utils.gpt import llm
 
 
-def get_feedback_prompt(assignment: str, attempt: str, p_language: str, language: str, difficulty: str, code: str = None, **kwargs):
+def get_feedback_prompt(assignment: str, attempt: str, p_language: str, language: str, difficulty: str,
+                        code: str = None, **kwargs):
     code_snippet = ""
     if code:
         code_snippet: str = f"""
@@ -30,11 +32,24 @@ Start now with the assessment and feedback in language {language}:
 """
     return prompt
 
+
 def get_feedback_stream(model="gpt-4o-mini", **kwargs):
+    challengeId = kwargs.get("challengeId")
+    attempt = kwargs.get("attempt")
     prompt = get_feedback_prompt(**kwargs)
     response_stream = llm.chat(prompt, stream=True, temperature=0.1, model=model)
+    total_response = ""
     for event in response_stream:
         chunk = event.choices[0].delta.content
         if chunk:
+            total_response += chunk
             yield chunk
-    yield "&&&"
+
+    db_update_challenge(
+        challengeId,
+        attempt=attempt,
+        feedback=total_response,
+        status="solved" if total_response.startswith("Correct!") else "attempting",
+    )
+
+    yield "§END§"

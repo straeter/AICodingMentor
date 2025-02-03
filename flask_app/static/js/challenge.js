@@ -1,18 +1,38 @@
-var currentContent = {
+const emptyContent = {
   assignment: "",
+  title: "",
   code: "",
   solution: "",
   hint: "",
-  feedback: ""
+  feedback: "",
+  challengeId: "",
+  attempt: "",
+  p_language: "",
+  language: "",
+  difficulty: "",
+  length: "",
+  description: "",
+  updated_at: ""
 }
 
+let currentContent = emptyContent
+
 function clearContent() {
-  currentContent = {
-    assignment: "",
-    code: "",
-    solution: "",
-    hint: "",
-    feedback: ""
+  currentContent = emptyContent
+}
+
+function clearQueryParam(name) {
+  const url = new URL(window.location.href);
+  url.searchParams.delete(name);
+}
+
+function ensureCorrectQuery(name, variable) {
+  const url = new URL(window.location.href);
+  const params = url.searchParams;
+
+  if (params.get(name) !== variable) {
+    params.set(name, variable); // Add or update the 'repo' parameter
+    window.history.replaceState({}, '', url); // Update the URL without reloading the page
   }
 }
 
@@ -43,6 +63,8 @@ async function fetchStream(data) {
     const hintDiv = document.getElementById('hint');
     hintDiv.innerHTML = "";
 
+    clearQueryParam("challengeId");
+
     clearContent();
 
     function assignContent() {
@@ -55,9 +77,11 @@ async function fetchStream(data) {
     function splitContent() {
       var content = totalResponse
       content = content
+        .replace("§TITLE§", "§§§§§")
         .replace("§CODE§", "§§§§§")
         .replace("§SOLUTION§", "§§§§§")
         .replace("§HINT§", "§§§§§")
+        .replace("§ID§", "§§§§§")
       var pLanguage = document.getElementById('pLanguage').value
       if (content.includes("```" + pLanguage)) {
         content = content.replace("```" + pLanguage, "").replace("```", "")
@@ -65,9 +89,14 @@ async function fetchStream(data) {
       var splitted = content.split("§§§§§")
       const lSplit = splitted.length
       currentContent.assignment = splitted[0]
-      currentContent.code = splitted[1]
-      currentContent.solution = splitted[2]
-      currentContent.hint = splitted[3]
+      currentContent.title = lSplit > 1 ? splitted[1] : "";
+      currentContent.code = lSplit > 2 ? splitted[2] : "";
+      currentContent.solution = lSplit > 3 ? splitted[3] : "";
+      currentContent.hint = lSplit > 4 ? splitted[4] : "";
+      if (lSplit > 5) {
+        currentContent.challengeId = splitted[6];
+        ensureCorrectQuery('challengeId', currentContent.challengeId);
+      }
     }
 
     let done = false;
@@ -81,11 +110,15 @@ async function fetchStream(data) {
         chunk = value
         totalResponse += chunk;
 
-        if (totalResponse.includes('&&&')) {
+        if (totalResponse.includes('§END§')) {
           break;
         }
 
-        if (totalResponse.includes("§CODE§") && currentBlock === "assignment") {
+        if (totalResponse.includes("§TITLE§") && currentBlock === "assignment") {
+          splitContent();
+          assignContent();
+          currentBlock = "title";
+        } else if (totalResponse.includes("§CODE§") && currentBlock === "title") {
           splitContent();
           assignContent();
           currentBlock = "code";
@@ -147,9 +180,9 @@ async function fetchFeedback(data) {
         chunk = value
         totalResponse += chunk;
 
-        feedbackDiv.innerHTML = marked.parse(totalResponse.replace('&&&', ''));
-        if (totalResponse.includes('&&&')) {
-          currentContent.feedback = totalResponse.replace('&&&', '');
+        feedbackDiv.innerHTML = marked.parse(totalResponse.replace('§END§', ''));
+        if (totalResponse.includes('§END§')) {
+          currentContent.feedback = totalResponse.replace('§END§', '');
           break;
         }
 
@@ -158,4 +191,63 @@ async function fetchFeedback(data) {
   } catch (error) {
     console.error('Fetch error:', error);
   }
+}
+
+function deleteChallenge(challengeId) {
+  fetch('/challenge/delete/' + challengeId, {
+    method: 'POST',
+    body: JSON.stringify({}),
+    headers: {
+      'Content-Type': 'application/json'
+    }
+  }).then(response => {
+    if (response.ok) {
+      location.reload();
+    } else {
+      console.log('Error deleting challenge:', response.json().data);
+    }
+  });
+}
+
+function updateCharCount() {
+  const input = document.getElementById('description');
+  const charCount = document.getElementById('charCount');
+  charCount.textContent = `${input.value.length}/200`;
+}
+
+function showSolution() {
+  attempt = editor.getValue();
+  editor.session.setValue(currentContent.solution, -1);
+  document.getElementById('showSolution').style.display = 'none';
+  document.getElementById('hideSolution').style.display = 'block';
+  document.getElementById('codeTitle').innerHTML = 'Possible Solution';
+  editor.setReadOnly(true);
+}
+
+function hideSolution() {
+  editor.session.setValue(attempt, -1);
+  document.getElementById('showSolution').style.display = 'block';
+  document.getElementById('hideSolution').style.display = 'none';
+  document.getElementById('codeTitle').innerHTML = 'Your Code';
+  editor.setReadOnly(false);
+}
+
+function toggleHint() {
+  var hint = document.getElementById('hint');
+  hint.style.display = hint.style.display === 'none' ? 'block' : 'none';
+  var hintButton = document.getElementById('getHint');
+  hintButton.innerHTML = hint.style.display === 'none' ? 'Show Hint' : 'Hide Hint';
+}
+
+function updatePLanguage() {
+  var selection = $('option:selected').attr('value');
+  selection = ['c', 'cpp'].includes(selection) ? 'c_cpp' : selection;
+  var mode = 'ace/mode/' + selection;
+  editor.getSession().setMode(mode);
+}
+
+function appendToEditorContent(extraCode) {
+  const lastRow = editor.session.getLength() - 1;
+  const lastColumn = editor.session.getLine(lastRow).length;
+  editor.session.insert({row: lastRow, column: lastColumn}, extraCode);
 }

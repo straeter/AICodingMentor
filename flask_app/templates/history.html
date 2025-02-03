@@ -1,0 +1,26 @@
+{% extends "meta.html" %}
+{% set active_page = "History" %}
+{% import "macros/history_table.html" as history_table %}
+{% block content %}
+  <div class="row my-3" style="text-align: center">
+    <h1>AICodingMentor - Your Challenge History</h1>
+  </div>
+
+  {{ history_table.history_table(challenges) }}
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const table = $('#scan_result').DataTable(
+        {
+          order: [[0, "desc"]],
+          lengthMenu: [
+            [25, 50, 100, -1],
+            [25, 50, 100, 'All']
+          ]
+        }
+      );
+      {#hljs.highlightAll();#}
+    });
+  </script>
+
+{% endblock content %}

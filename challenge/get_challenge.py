@@ -1,3 +1,4 @@
+from flask_app.simple_db import db_save_challenge
 from utils.gpt import llm
 
 
@@ -33,7 +34,9 @@ It is ok to expect knowledge of common non-standard libraries like numpy, torch 
 Please create the programming challenge in the following order:
 
 - assignment (describe what the user has to do, make it clear if the user should write code, extend code or correct code, start right away with the assignment and not with a title)
-- §CODE§ (use this signal word to indicate that the problem code begins now)
+- §TITLE§ (use this signal word to indicate that the title starts now)
+- a title for the challenge (it should be long enough so that you do not generate too similar challenges in the future) -> no extra formatting
+- §CODE§ (use this signal word to indicate that the problem code starts now)
 - problem code (the code that the user has to extend or correct -> if the user has to write some code from scratch, leave this part blank or just write down an empty function, class etc.)
 - §SOLUTION§ (use this signal word to indicate that the solution code starts now)
 - solution (a correct solution code with comments explaining the code)
@@ -43,6 +46,8 @@ Please create the programming challenge in the following order:
 ### Start example 1 (programming language python, difficulty 1 (easy), length 1 (short), description: basics)
 
 Please write correct the function string_length that calculates the length of a string.
+§TITLE§
+Function to calculate the length of a string
 §CODE§
 # Wrong function to correct
 def string_length(string):
@@ -59,6 +64,8 @@ Remember the python function that calculates the length of a string.
 ### Start example 2 (programming language javascript, difficulty 3 (medium), length 3 (medium), description: arrays)
 
 Please create a function named `mergeAndSortArrays` that takes two arrays of numbers as arguments. The function should merge the two arrays into one, eliminate any duplicates, and return the merged array sorted in ascending order. Ensure that you handle edge cases, such as when one or both arrays are empty. 
+§TITLE§
+Function to merge and sort arrays
 §CODE§
 // Write now your function:
 function mergeAndSortArrays() {
@@ -100,4 +107,7 @@ def get_challenge_stream(model="gpt-4o-mini", **kwargs):
         if chunk:
             total_response += chunk
             yield chunk
-    yield "&&&"
+
+    challenge = db_save_challenge(total_response, kwargs)
+
+    yield f"§ID§{challenge.challengeId}§END§"

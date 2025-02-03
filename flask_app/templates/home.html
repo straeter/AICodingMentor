@@ -121,16 +121,16 @@
             </div>
             <div class="col-12 mb-3">
               <div style="justify-content: space-between">
-{#                <label>#}
-{#                  <input#}
-{#                    type="checkbox" {{ "checked" if save_questions else "" }}#}
-{#                    class="custom-checkbox"#}
-{#                    id="save_questions"#}
-{#                    name="save_questions"#}
-{#                  >#}
-{#                  <span class="checkmark"></span>#}
-{#                  Save History#}
-{#                </label>#}
+                {#                <label>#}
+                {#                  <input#}
+                {#                    type="checkbox" {{ "checked" if save_questions else "" }}#}
+                {#                    class="custom-checkbox"#}
+                {#                    id="save_questions"#}
+                {#                    name="save_questions"#}
+                {#                  >#}
+                {#                  <span class="checkmark"></span>#}
+                {#                  Save History#}
+                {#                </label>#}
                 <button
                   type="submit"
                   id="getChallange"
@@ -200,49 +200,6 @@
     var editor = null;
     var attempt = "";
 
-    function updateCharCount() {
-      const input = document.getElementById('description');
-      const charCount = document.getElementById('charCount');
-      charCount.textContent = `${input.value.length}/200`;
-    }
-
-    function showSolution() {
-      attempt = editor.getValue();
-      editor.session.setValue(currentContent.solution, -1);
-      document.getElementById('showSolution').style.display = 'none';
-      document.getElementById('hideSolution').style.display = 'block';
-      document.getElementById('codeTitle').innerHTML = 'Possible Solution';
-      editor.setReadOnly(true);
-    }
-
-    function hideSolution() {
-      editor.session.setValue(attempt, -1);
-      document.getElementById('showSolution').style.display = 'block';
-      document.getElementById('hideSolution').style.display = 'none';
-      document.getElementById('codeTitle').innerHTML = 'Your Code';
-      editor.setReadOnly(false);
-    }
-
-    function toggleHint() {
-      var hint = document.getElementById('hint');
-      hint.style.display = hint.style.display === 'none' ? 'block' : 'none';
-      var hintButton = document.getElementById('getHint');
-      hintButton.innerHTML = hint.style.display === 'none' ? 'Show Hint' : 'Hide Hint';
-    }
-
-    function updatePLanguage() {
-      var selection = $('option:selected').attr('value');
-      selection = ['c', 'cpp'].includes(selection) ? 'c_cpp' : selection;
-      var mode = 'ace/mode/' + selection;
-      editor.getSession().setMode(mode);
-    }
-
-    function appendToEditorContent(extraCode) {
-      const lastRow = editor.session.getLength() - 1;
-      const lastColumn = editor.session.getLine(lastRow).length;
-      editor.session.insert({row: lastRow, column: lastColumn}, extraCode);
-    }
-
     document.addEventListener('DOMContentLoaded', function () {
       editor = ace.edit("editor");
       editor.getSession().setUseWorker(false);
@@ -251,6 +208,25 @@
       editor.setOptions({
         fontSize: "14pt"
       });
+
+      {% if challenge %}
+        currentContent = {{ challenge|tojson }};
+        editor.setReadOnly(false);
+        if (currentContent.attempt) {
+          editor.setValue(currentContent.attempt, -1);
+          const feedbackDiv = document.getElementById('feedback');
+          feedbackDiv.innerHTML = marked.parse({{ challenge.feedback|tojson }});
+        } else {
+          editor.setValue(currentContent.code, -1);
+        }
+        document.getElementById('hint').innerHTML = marked.parse(currentContent.hint);
+        document.getElementById('assignment').innerHTML = marked.parse(currentContent.assignment);
+        {#document.getElementById('challengeTitle').textContent = currentContent.title;#}
+
+      {% else %}
+        editor.setReadOnly(true);
+        editor.setValue("# Let's go! Generate a challenge with the sidebar!", -1);
+      {% endif %}
     });
 
     document.getElementById('getChallenge').addEventListener('submit', function (event) {
