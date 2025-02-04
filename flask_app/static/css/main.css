@@ -6,6 +6,14 @@
   font-weight: bolder;
 }
 
+/* Make the alert message take full width and center */
+.alert {
+  margin: 0; /* Remove any margin */
+  width: 100vw; /* Full viewport width */
+  border-radius: 0; /* Remove border radius for full width look */
+  text-align: center; /* Center the text */
+  box-sizing: border-box; /* Ensure padding is included in width */
+}
 
 /* Make the flash container sticky below the navbar */
 .sticky-flash {
@@ -42,10 +50,10 @@ pre {
 }
 
 code {
-    height: 100% !important;
+  height: 100% !important;
   font-family: 'Courier New', Courier, monospace; /* Monospaced font */
   font-size: 14px !important; /* Adjust font size */
-  padding: 0 0 5px 0!important; /* Remove default padding */
+  padding: 0 0 5px 0 !important; /* Remove default padding */
   /*width: 850px !important;*/
   max-width: 850px !important; /* Fixed width */
   width: 100% !important; /* Responsive */
@@ -111,7 +119,7 @@ code {
 }
 
 #editor {
-    position: relative;
-  height:100%;
-    width: 100%;
+  position: relative;
+  height: 100%;
+  width: 100%;
 }

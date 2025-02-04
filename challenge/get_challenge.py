@@ -1,7 +1,15 @@
+from flask_app.simple_db import db_save_challenge, generate_unique_id, get_similar_challenges
 from utils.gpt import llm
 
 
-def get_prompt(description: str, p_language: str, language: str, difficulty: int, length: int):
+def get_prompt(similar_challenges: list, description: str, p_language: str, language: str, difficulty: int, length: int):
+    similar_snippet = f"""
+The user has solved similar challenges before, here are the titles (so that you do not create a too similar challenge):
+### Start of similar challenges
+{"\n".join([str(j) + ': ' + chal.title for j, chal in enumerate(similar_challenges)])}
+### End of similar challenges
+""" if similar_challenges else ""
+
     description_snippet = """
 The user has provided a small description of the topic that he wants to learn / be challenged on:
 ### Start of description
@@ -33,7 +41,9 @@ It is ok to expect knowledge of common non-standard libraries like numpy, torch 
 Please create the programming challenge in the following order:
 
 - assignment (describe what the user has to do, make it clear if the user should write code, extend code or correct code, start right away with the assignment and not with a title)
-- §CODE§ (use this signal word to indicate that the problem code begins now)
+- §TITLE§ (use this signal word to indicate that the title starts now)
+- a title for the challenge (it should be long enough so that you do not generate too similar challenges in the future) -> no extra formatting
+- §CODE§ (use this signal word to indicate that the problem code starts now)
 - problem code (the code that the user has to extend or correct -> if the user has to write some code from scratch, leave this part blank or just write down an empty function, class etc.)
 - §SOLUTION§ (use this signal word to indicate that the solution code starts now)
 - solution (a correct solution code with comments explaining the code)
@@ -43,6 +53,8 @@ Please create the programming challenge in the following order:
 ### Start example 1 (programming language python, difficulty 1 (easy), length 1 (short), description: basics)
 
 Please write correct the function string_length that calculates the length of a string.
+§TITLE§
+Function to calculate the length of a string
 §CODE§
 # Wrong function to correct
 def string_length(string):
@@ -59,6 +71,8 @@ Remember the python function that calculates the length of a string.
 ### Start example 2 (programming language javascript, difficulty 3 (medium), length 3 (medium), description: arrays)
 
 Please create a function named `mergeAndSortArrays` that takes two arrays of numbers as arguments. The function should merge the two arrays into one, eliminate any duplicates, and return the merged array sorted in ascending order. Ensure that you handle edge cases, such as when one or both arrays are empty. 
+§TITLE§
+Function to merge and sort arrays
 §CODE§
 // Write now your function:
 function mergeAndSortArrays() {
@@ -79,6 +93,8 @@ Remember to use the spread operator to merge the arrays and the Set object to el
 
 ### End example 2
 
+{similar_challenges}
+
 Please create now a programming challenge for the user with parameters programming language {p_language}, difficulty level {difficulty}/5, length {length}/5, description '{description}' (if any) and write everything in language {language}:
 """
               .replace("{p_language}", p_language)
@@ -87,17 +103,27 @@ Please create now a programming challenge for the user with parameters programmi
               .replace("{length}", str(length))
               .replace("{description_snippet}", description_snippet)
               .replace("{description}", description)
+              .replace("{similar_challenges}", similar_snippet)
               )
     return prompt
 
 
 def get_challenge_stream(model="gpt-4o-mini", **kwargs):
-    prompt = get_prompt(**kwargs)
+
+    similar_challenges = get_similar_challenges(**kwargs)
+
+    prompt = get_prompt(similar_challenges, **kwargs)
     response_stream = llm.chat(prompt, stream=True, temperature=1.0, model=model)
+    challengeId = generate_unique_id()
+    yield f"{challengeId}§ASSIGNMENT§"
+
     total_response = ""
     for event in response_stream:
         chunk = event.choices[0].delta.content
         if chunk:
             total_response += chunk
             yield chunk
-    yield "&&&"
+
+    challenge = db_save_challenge(challengeId, total_response, kwargs)
+
+    yield "§END§"

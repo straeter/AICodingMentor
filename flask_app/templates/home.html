@@ -1,11 +1,11 @@
 {% extends "meta.html" %}
-{% set active_page = "Scan" %}
+{% set active_page = "Challenge" %}
 
 {% block content %}
   <div class="row my-3" style="text-align: center">
     <h1>AICodingMentor</h1>
   </div>
-  <div class="row flex-grow-1">
+  <div class="row">
     <div class="col-md-4">
       <div class="custom-block">
         <form
@@ -121,16 +121,16 @@
             </div>
             <div class="col-12 mb-3">
               <div style="justify-content: space-between">
-{#                <label>#}
-{#                  <input#}
-{#                    type="checkbox" {{ "checked" if save_questions else "" }}#}
-{#                    class="custom-checkbox"#}
-{#                    id="save_questions"#}
-{#                    name="save_questions"#}
-{#                  >#}
-{#                  <span class="checkmark"></span>#}
-{#                  Save History#}
-{#                </label>#}
+                {#                <label>#}
+                {#                  <input#}
+                {#                    type="checkbox" {{ "checked" if save_questions else "" }}#}
+                {#                    class="custom-checkbox"#}
+                {#                    id="save_questions"#}
+                {#                    name="save_questions"#}
+                {#                  >#}
+                {#                  <span class="checkmark"></span>#}
+                {#                  Save History#}
+                {#                </label>#}
                 <button
                   type="submit"
                   id="getChallange"
@@ -182,13 +182,43 @@
     </div>
 
     <div class="col col-md-8">
-      <div class="custom-block" style="height:100%!important; display: flex; flex-direction: column;">
-        <h4>Assignment</h4>
+      <div class="custom-block" style="height:100%!important;">
+        <div class="justify-content-between" style="display: flex">
+          <div style="display: flex; align-items: start;">
+            <div style="display:inline-block; font-size: 1.5rem; font-weight: 600;" id="challengeTitle">Assignment:
+            </div>
+          </div>
+          <div style="display: flex; align-items: center;">
+            <div class="if-challenge">
+              <div class="mx-1">Status:</div>
+              {% if challenge.status == "attempting" %}
+                <div style="background-color: yellow" class="attempt-status">Attempting</div>
+              {% elif challenge.status == "solved" %}
+                <div style="background-color: green; color:white;" class="attempt-status">Solved</div>
+              {% else %}
+                <div class="attempt-status">Open</div>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+
         <div id="assignment" style="min-height: 30px"></div>
 
+        <div class="if-challenge justify-content-end mt-2" style="display: {{ 'flex' if challenge else 'none' }}"
+             id="processChallenge">
+          <div style="display: inline-block">
+            <button class="btn btn-outline-success" id="startOver" onclick="startOver()">
+              Start Over
+            </button>
+            <button class="btn btn-success" id="saveAttempt" onclick="saveAttempt()">
+              Save
+            </button>
+          </div>
+        </div>
+
         <h4 id="codeTitle">Your Code</h4>
-        <div style="flex-grow: 1">
-          <div id="editor"></div>
+        <div>
+          <div id="editor" style="min-height: 500px"></div>
         </div>
       </div>
     </div>
@@ -200,49 +230,6 @@
     var editor = null;
     var attempt = "";
 
-    function updateCharCount() {
-      const input = document.getElementById('description');
-      const charCount = document.getElementById('charCount');
-      charCount.textContent = `${input.value.length}/200`;
-    }
-
-    function showSolution() {
-      attempt = editor.getValue();
-      editor.session.setValue(currentContent.solution, -1);
-      document.getElementById('showSolution').style.display = 'none';
-      document.getElementById('hideSolution').style.display = 'block';
-      document.getElementById('codeTitle').innerHTML = 'Possible Solution';
-      editor.setReadOnly(true);
-    }
-
-    function hideSolution() {
-      editor.session.setValue(attempt, -1);
-      document.getElementById('showSolution').style.display = 'block';
-      document.getElementById('hideSolution').style.display = 'none';
-      document.getElementById('codeTitle').innerHTML = 'Your Code';
-      editor.setReadOnly(false);
-    }
-
-    function toggleHint() {
-      var hint = document.getElementById('hint');
-      hint.style.display = hint.style.display === 'none' ? 'block' : 'none';
-      var hintButton = document.getElementById('getHint');
-      hintButton.innerHTML = hint.style.display === 'none' ? 'Show Hint' : 'Hide Hint';
-    }
-
-    function updatePLanguage() {
-      var selection = $('option:selected').attr('value');
-      selection = ['c', 'cpp'].includes(selection) ? 'c_cpp' : selection;
-      var mode = 'ace/mode/' + selection;
-      editor.getSession().setMode(mode);
-    }
-
-    function appendToEditorContent(extraCode) {
-      const lastRow = editor.session.getLength() - 1;
-      const lastColumn = editor.session.getLine(lastRow).length;
-      editor.session.insert({row: lastRow, column: lastColumn}, extraCode);
-    }
-
     document.addEventListener('DOMContentLoaded', function () {
       editor = ace.edit("editor");
       editor.getSession().setUseWorker(false);
@@ -251,6 +238,25 @@
       editor.setOptions({
         fontSize: "14pt"
       });
+
+      {% if challenge %}
+        currentContent = {{ challenge|tojson }};
+        editor.setReadOnly(false);
+        if (currentContent.attempt) {
+          editor.setValue(currentContent.attempt, -1);
+          const feedbackDiv = document.getElementById('feedback');
+          feedbackDiv.innerHTML = marked.parse({{ challenge.feedback|tojson }});
+        } else {
+          editor.setValue(currentContent.code, -1);
+        }
+        document.getElementById('hint').innerHTML = marked.parse(currentContent.hint);
+        document.getElementById('assignment').innerHTML = marked.parse(currentContent.assignment);
+        {#document.getElementById('challengeTitle').textContent = currentContent.title;#}
+
+      {% else %}
+        editor.setReadOnly(true);
+        editor.setValue("# Let's go! Generate a challenge with the sidebar!", -1);
+      {% endif %}
     });
 
     document.getElementById('getChallenge').addEventListener('submit', function (event) {
