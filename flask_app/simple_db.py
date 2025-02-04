@@ -96,3 +96,19 @@ def db_update_challenge(challengeId, **kwargs):
 def db_get_all_challenges():
     challenges = Challenge.query.order_by(Challenge.updated_at.desc()).all()
     return challenges
+
+
+def get_similar_challenges(
+        p_language: str, language: str, difficulty: str, length: str, description: str, **params
+):
+    query = Challenge.query.filter_by(
+        p_language=p_language,
+        language=language,
+        difficulty=difficulty,
+        length=length,
+        description=description
+    ).order_by(Challenge.updated_at.desc()).limit(20)
+
+    similar_challenges = query.all()
+
+    return similar_challenges

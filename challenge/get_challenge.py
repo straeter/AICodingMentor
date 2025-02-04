@@ -1,8 +1,15 @@
-from flask_app.simple_db import db_save_challenge, generate_unique_id
+from flask_app.simple_db import db_save_challenge, generate_unique_id, get_similar_challenges
 from utils.gpt import llm
 
 
-def get_prompt(description: str, p_language: str, language: str, difficulty: int, length: int):
+def get_prompt(similar_challenges: list, description: str, p_language: str, language: str, difficulty: int, length: int):
+    similar_snippet = f"""
+The user has solved similar challenges before, here are the titles (so that you do not create a too similar challenge):
+### Start of similar challenges
+{"\n".join([str(j) + ': ' + chal.title for j, chal in enumerate(similar_challenges)])}
+### End of similar challenges
+""" if similar_challenges else ""
+
     description_snippet = """
 The user has provided a small description of the topic that he wants to learn / be challenged on:
 ### Start of description
@@ -86,6 +93,8 @@ Remember to use the spread operator to merge the arrays and the Set object to el
 
 ### End example 2
 
+{similar_challenges}
+
 Please create now a programming challenge for the user with parameters programming language {p_language}, difficulty level {difficulty}/5, length {length}/5, description '{description}' (if any) and write everything in language {language}:
 """
               .replace("{p_language}", p_language)
@@ -94,12 +103,16 @@ Please create now a programming challenge for the user with parameters programmi
               .replace("{length}", str(length))
               .replace("{description_snippet}", description_snippet)
               .replace("{description}", description)
+              .replace("{similar_challenges}", similar_snippet)
               )
     return prompt
 
 
 def get_challenge_stream(model="gpt-4o-mini", **kwargs):
-    prompt = get_prompt(**kwargs)
+
+    similar_challenges = get_similar_challenges(**kwargs)
+
+    prompt = get_prompt(similar_challenges, **kwargs)
     response_stream = llm.chat(prompt, stream=True, temperature=1.0, model=model)
     challengeId = generate_unique_id()
     yield f"{challengeId}§ASSIGNMENT§"
