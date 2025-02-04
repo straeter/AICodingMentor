@@ -1,4 +1,4 @@
-from flask_app.simple_db import db_save_challenge
+from flask_app.simple_db import db_save_challenge, generate_unique_id
 from utils.gpt import llm
 
 
@@ -101,6 +101,9 @@ Please create now a programming challenge for the user with parameters programmi
 def get_challenge_stream(model="gpt-4o-mini", **kwargs):
     prompt = get_prompt(**kwargs)
     response_stream = llm.chat(prompt, stream=True, temperature=1.0, model=model)
+    challengeId = generate_unique_id()
+    yield f"{challengeId}§ASSIGNMENT§"
+
     total_response = ""
     for event in response_stream:
         chunk = event.choices[0].delta.content
@@ -108,6 +111,6 @@ def get_challenge_stream(model="gpt-4o-mini", **kwargs):
             total_response += chunk
             yield chunk
 
-    challenge = db_save_challenge(total_response, kwargs)
+    challenge = db_save_challenge(challengeId, total_response, kwargs)
 
-    yield f"§ID§{challenge.challengeId}§END§"
+    yield "§END§"

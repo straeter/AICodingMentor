@@ -183,8 +183,38 @@
 
     <div class="col col-md-8">
       <div class="custom-block" style="height:100%!important;">
-        <h4>Assignment</h4>
+        <div class="justify-content-between" style="display: flex">
+          <div style="display: flex; align-items: start;">
+            <div style="display:inline-block; font-size: 1.5rem; font-weight: 600;" id="challengeTitle">Assignment:
+            </div>
+          </div>
+          <div style="display: flex; align-items: center;">
+            <div class="if-challenge">
+              <div class="mx-1">Status:</div>
+              {% if challenge.status == "attempting" %}
+                <div style="background-color: yellow" class="attempt-status">Attempting</div>
+              {% elif challenge.status == "solved" %}
+                <div style="background-color: green; color:white;" class="attempt-status">Solved</div>
+              {% else %}
+                <div class="attempt-status">Open</div>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+
         <div id="assignment" style="min-height: 30px"></div>
+
+        <div class="if-challenge justify-content-end mt-2" style="display: {{ 'flex' if challenge else 'none' }}"
+             id="processChallenge">
+          <div style="display: inline-block">
+            <button class="btn btn-outline-success" id="startOver" onclick="startOver()">
+              Start Over
+            </button>
+            <button class="btn btn-success" id="saveAttempt" onclick="saveAttempt()">
+              Save
+            </button>
+          </div>
+        </div>
 
         <h4 id="codeTitle">Your Code</h4>
         <div>

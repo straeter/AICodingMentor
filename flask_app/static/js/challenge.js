@@ -31,9 +31,43 @@ function ensureCorrectQuery(name, variable) {
   }
 }
 
+function showFlashMessage(message, category) {
+  // remove present flash messages
+  var flashMessages = document.querySelectorAll('.alert');
+  flashMessages.forEach(function (flashMessage) {
+    flashMessage.remove();
+  });
+
+  // Create a div element for the flash message
+  var flashMessageDiv = document.createElement('div');
+  flashMessageDiv.className = `alert alert-${category}`;
+  flashMessageDiv.innerHTML = message;
+
+  // Add it to the top of the page or inside a specific container
+  var container = document.getElementById('flash-container') || document.body;
+  container.prepend(flashMessageDiv);
+
+  // Remove the flash message after 5 seconds
+  setTimeout(function () {
+    flashMessageDiv.remove();
+  }, 4000);
+}
+
 
 async function fetchStream(data) {
   try {
+
+    const assignmentDiv = document.getElementById('assignment');
+    assignmentDiv.innerHTML = "";
+    const hintDiv = document.getElementById('hint');
+    hintDiv.innerHTML = "";
+
+    ensureCorrectQuery("challengeId", "");
+
+    editor.setReadOnly(false);
+    editor.session.setValue("");
+    clearContent();
+
     const response = await fetch('/get_challenge', {
       method: 'POST',
       body: JSON.stringify(data),
@@ -50,18 +84,6 @@ async function fetchStream(data) {
       .pipeThrough(new TextDecoderStream())
       .getReader();
 
-    var currentBlock = "assignment";
-    var totalResponse = "";
-
-    const assignmentDiv = document.getElementById('assignment');
-    assignmentDiv.innerHTML = "";
-    const hintDiv = document.getElementById('hint');
-    hintDiv.innerHTML = "";
-
-    ensureCorrectQuery("challengeId", "");
-
-    clearContent();
-
     function assignContent() {
       splitContent(totalResponse);
       assignmentDiv.innerHTML = marked.parse(currentContent.assignment);
@@ -72,6 +94,7 @@ async function fetchStream(data) {
     function splitContent() {
       var content = totalResponse
       content = content
+        .replace("§ASSIGNMENT§", "§§§§§")
         .replace("§TITLE§", "§§§§§")
         .replace("§CODE§", "§§§§§")
         .replace("§SOLUTION§", "§§§§§")
@@ -84,17 +107,16 @@ async function fetchStream(data) {
       }
       var splitted = content.split("§§§§§")
       const lSplit = splitted.length
-      currentContent.assignment = splitted[0]
-      currentContent.title = lSplit > 1 ? splitted[1] : "";
-      currentContent.code = lSplit > 2 ? splitted[2] : "";
-      currentContent.solution = lSplit > 3 ? splitted[3] : "";
-      currentContent.hint = lSplit > 4 ? splitted[4] : "";
-      if (lSplit > 5) {
-        currentContent.challengeId = splitted[5];
-        ensureCorrectQuery('challengeId', currentContent.challengeId);
-      }
+      currentContent.challengeId = splitted[0];
+      currentContent.assignment = lSplit > 1 ? splitted[1] : "";
+      currentContent.title = lSplit > 2 ? splitted[2] : "";
+      currentContent.code = lSplit > 3 ? splitted[3] : "";
+      currentContent.solution = lSplit > 4 ? splitted[4] : "";
+      currentContent.hint = lSplit > 5 ? splitted[5] : "";
     }
 
+    var currentBlock = "id";
+    var totalResponse = "";
     let done = false;
     var chunk = ""
 
@@ -110,7 +132,12 @@ async function fetchStream(data) {
           break;
         }
 
-        if (totalResponse.includes("§TITLE§") && currentBlock === "assignment") {
+        if (totalResponse.includes("§ASSIGNMENT§") && currentBlock === "id") {
+          splitContent();
+          assignContent();
+          ensureCorrectQuery('challengeId', currentContent.challengeId);
+          currentBlock = "assignment";
+        } else if (totalResponse.includes("§TITLE§") && currentBlock === "assignment") {
           splitContent();
           assignContent();
           currentBlock = "title";
@@ -250,3 +277,35 @@ function appendToEditorContent(extraCode) {
   const lastColumn = editor.session.getLine(lastRow).length;
   editor.session.insert({row: lastRow, column: lastColumn}, extraCode);
 }
+
+
+function saveAttempt() {
+  var code_attempt = editor.getValue();
+  currentContent.attempt = code_attempt;
+  var challengeId = currentContent.challengeId;
+  var data = {
+    challengeId: challengeId,
+    attempt: code_attempt,
+  }
+  fetch("/challenge/save/", {
+    method: 'POST',
+    body: JSON.stringify(data),
+    headers: {
+      'Content-Type': 'application/json'
+    }
+  }).then(response => {
+    if (response.ok) {
+      showFlashMessage('Attempt saved successfully!', 'success');
+    } else {
+      showFlashMessage('Error saving attempt:', 'danger');
+      console.log('Error saving attempt:', response.json().data);
+    }
+  })
+}
+
+function startOver() {
+  editor.session.setValue(currentContent.code, -1);
+  showFlashMessage('Code reset successfully!', 'success');
+}
+
+

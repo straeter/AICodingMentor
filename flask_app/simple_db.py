@@ -60,9 +60,8 @@ def split_response(message: str) -> dict:
     return result_dict
 
 
-def db_save_challenge(response, params):
+def db_save_challenge(challengeId, response, params):
     challenge_dict = split_response("§ASSIGNMENT§" + response + "§END§")
-    challengeId = generate_unique_id()
     challenge = Challenge(challengeId=challengeId, **params, **challenge_dict)
     db.session.add(challenge)
     db.session.commit()

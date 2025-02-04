@@ -2,7 +2,7 @@ from flask import Blueprint, render_template, request, current_app, jsonify, str
 
 from challenge.get_challenge import get_challenge_stream
 from challenge.get_feedback import get_feedback_stream
-from flask_app.simple_db import db_get_challenge, db_delete_challenge, db_get_all_challenges
+from flask_app.simple_db import db_get_challenge, db_delete_challenge, db_get_all_challenges, db_update_challenge
 
 main = Blueprint('main', __name__)
 
@@ -12,14 +12,15 @@ main = Blueprint('main', __name__)
 def home():
     challengeId = request.args.get("challengeId")
     if challengeId:
-        challenge = db_get_challenge(challengeId).to_dict()
+        challenge = db_get_challenge(challengeId)
+
     else:
         challenge = None
 
     return render_template(
         'home.html',
         page_title="AICodingMentorg - Home",
-        challenge=challenge
+        challenge=challenge.to_dict() if challenge else None
     )
 
 
@@ -55,5 +56,15 @@ def delete_challenge(challengeId):
     success = db_delete_challenge(challengeId)
     if success:
         return jsonify({"message": "Challenge deleted successfully"}, 201)
+    else:
+        return jsonify({"message": "Challenge not found"}, 404)
+
+
+@main.route('/challenge/save/', methods=['POST'])
+def save_challenge():
+    data = request.json
+    success = db_update_challenge(**data)
+    if success:
+        return jsonify({"message": "Challenge updated successfully"}, 201)
     else:
         return jsonify({"message": "Challenge not found"}, 404)
